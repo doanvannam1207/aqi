@@ -1,0 +1,86 @@
+<html lang="en">
+<head>
+    <meta charSet="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality Map</title>
+    <!-- Include Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        .legend {
+            background-color: white; /* Đổi màu nền thành màu trắng */
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+    </style>
+</head>
+<body>
+<div id="map" style="height: 800px;"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+<script>
+    $(document).ready(function () {
+        // Call the Spring Boot API to fetch air quality data
+        $.getJSON("/airquality", function (data) {
+            displayAirQualityOnMap(data);
+        });
+    });
+
+    function displayAirQualityOnMap(data) {
+        var map = L.map('map').setView([21.02885, 105.85027], 10); // Initial map view
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Lặp qua dữ liệu chất lượng không khí và thêm extra marker vào bản đồ
+        data.forEach(function (item) {
+            // Tạo một biểu tượng dạng div chứa số AQI với màu tùy chỉnh
+            var extraMarkerIcon = L.divIcon({
+                className: 'extra-marker-icon',
+                html: '<div class="marker-content">' + item.aqi + '</div>',
+                iconSize: [30, 30], // Kích thước của biểu tượng
+                iconAnchor: [15, 30], // Điểm neo của biểu tượng
+                popupAnchor: [0, -30], // Điểm neo của popup
+                // CSS tùy chỉnh
+                html: '<div class="extra-marker" style="background-color: '+ item.color+ '; text-align: center">' + item.aqi + '</div>',
+            });
+
+            // Tạo một ExtraMarker với biểu tượng tùy chỉnh và vị trí
+            var extraMarker = L.marker([item.latitude, item.longitude], {
+                icon: extraMarkerIcon
+            }).addTo(map);
+
+            // Tạo nội dung HTML cho popup
+            var popupContent = item.city
+                                + "<br>Chỉ số không khí: " + item.aqi
+                                + "<br>Chất ô nhiễm chính: " + item.main_pollutant
+                                + "<br>Nhiệt độ: " + item.temperature + " độ C"
+                                + "<br>Áp suất không khí: " + item.atmospheric_pressure + "hPa"
+                                + "<br>Độ ẩm: " + item.humidity + "%"
+                                + "<br>Tốc độ gió: " + item.wind_speed + "m/s"
+                                + "<br>Tình trạng thời tiết: " + item.weather;
+            // Gắn popup vào ExtraMarker
+            extraMarker.bindPopup(popupContent);
+        });
+        var legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML += '<h4>Chú thích</h4>';
+            div.innerHTML += '<p style="background-color: #17fc03; color: white; text-align: center">0-50</p>';
+            div.innerHTML += '<p style="background-color: #fcba03; color: white; text-align: center">51-100</p>';
+            div.innerHTML += '<p style="background-color: #fc8403; color: white; text-align: center">101-150</p>';
+            div.innerHTML += '<p style="background-color: #fc2c03; color: white; text-align: center">151-200</p>';
+            div.innerHTML += '<p style="background-color: #660066; color: white; text-align: center">201-300</p>';
+            div.innerHTML += '<p style="background-color: #800000; color: white; text-align: center">>300</p>';
+            return div;
+        };
+
+        legend.addTo(map);
+    }
+</script>
+</body>
+</html>
