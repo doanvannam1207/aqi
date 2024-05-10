@@ -17,6 +17,8 @@ public class Location {
     private int id;
 
     @Column
+    private String name;
+    @Column
     private double longitude;
     @Column
     private double latitude;

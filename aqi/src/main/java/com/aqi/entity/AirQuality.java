@@ -19,13 +19,9 @@ public class AirQuality {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @Column
-    private String city;
-    @Column
-    private double latitude; //vĩ độ
-    @Column
-    private double longitude; //kinh độ
+    @ManyToOne
+    @JoinColumn(name = "location_id")
+    private Location location;
     @Column
     private double temperature; //nhiệt độ
     @Column

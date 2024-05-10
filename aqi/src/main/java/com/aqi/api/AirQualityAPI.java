@@ -17,12 +17,12 @@ public class AirQualityAPI {
     @Autowired
     private AirQualityService airQualityService;
 
-    @GetMapping("/airquality")
-    public List<AirQuality> getAirQuality() throws JSONException, URISyntaxException, IOException, InterruptedException {
-        return airQualityService.save();
-    }
 //    @GetMapping("/airquality")
-//    public String getAirQuality() throws JSONException, URISyntaxException, IOException, InterruptedException {
-//        return airQualityService.getAirQualityData();
+//    public List<AirQuality> getAirQuality() throws JSONException, URISyntaxException, IOException, InterruptedException {
+//        return airQualityService.save();
 //    }
+    @GetMapping("/airquality")
+    public String getAirQuality() throws JSONException, URISyntaxException, IOException, InterruptedException {
+        return airQualityService.getAirQualityData();
+    }
 }
