@@ -13,7 +13,41 @@
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
+        .leaflet-popup {
+            position: absolute;
+            border-radius: 0px;
+            padding: 0px;
+            min-width: 200px;
+        }
+        .leaflet-popup-content {
+            margin: 0px;
+            border-radius: 0px;
+        }
 
+        .leaflet-popup-content-wrapper {
+            padding: 0px;
+            border-radius: 0px;
+        }
+        .styled-table {
+            display: inline-block;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            border: 1px solid #ddd; /* Màu và độ rộng của đường viền */
+            padding: 8px; /* Khoảng cách giữa nội dung và viền */
+            text-align: left; /* Căn lề văn bản */
+        }
+
+        .styled-table th {
+            background-color: #f2f2f2; /* Màu nền của header */
+        }
+
+        .styled-table tr:nth-child(even) {
+            background-color: #f2f2f2; /* Màu nền của các hàng chẵn */
+        }
     </style>
 </head>
 <body>
@@ -23,11 +57,33 @@
 <script>
     $(document).ready(function () {
         // Call the Spring Boot API to fetch air quality data
-        $.getJSON("/airquality", function (data) {
+        $.getJSON("/test", function (data) {
             displayAirQualityOnMap(data);
         });
     });
 
+    function convertTimeToVietnameseDateTime(dateString) {
+        // Tạo đối tượng Date từ chuỗi thời gian ban đầu
+        const date = new Date(dateString);
+
+        // Chuyển múi giờ sang múi giờ Việt Nam (UTC+7)
+        const vietnamDate = new Date(date.getTime());
+
+        // Định dạng thời gian theo yêu cầu 'HH:mm:ss DD-MM-YYYY'
+        const options = {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        };
+
+        const formatter = new Intl.DateTimeFormat('vi-VN', options);
+        const formattedDate = formatter.format(vietnamDate);
+
+        return formattedDate;
+    }
     function displayAirQualityOnMap(data) {
         var map = L.map('map').setView([21.02885, 105.85027], 10); // Initial map view
 
@@ -40,42 +96,140 @@
             // Tạo một biểu tượng dạng div chứa số AQI với màu tùy chỉnh
             var extraMarkerIcon = L.divIcon({
                 className: 'extra-marker-icon',
-                html: '<div class="marker-content">' + item.aqi + '</div>',
+                html: '<div class="marker-content">' + item.airQuality_1.aqi + '</div>',
                 iconSize: [30, 30], // Kích thước của biểu tượng
                 iconAnchor: [15, 30], // Điểm neo của biểu tượng
                 popupAnchor: [0, -30], // Điểm neo của popup
                 // CSS tùy chỉnh
-                html: '<div class="extra-marker" style="background-color: '+ item.color+ '; text-align: center">' + item.aqi + '</div>',
+                html: '<div class="extra-marker" style="background-color: '+ item.airQuality_1.color+ '; text-align: center">' + item.airQuality_1.aqi + '</div>',
             });
 
             // Tạo một ExtraMarker với biểu tượng tùy chỉnh và vị trí
-            var extraMarker = L.marker([item.latitude, item.longitude], {
+            var extraMarker = L.marker([item.airQuality_1.location.latitude, item.airQuality_1.location.longitude], {
                 icon: extraMarkerIcon
             }).addTo(map);
 
             // Tạo nội dung HTML cho popup
-            var popupContent = item.city
-                                + "<br>Chỉ số không khí: " + item.aqi
-                                + "<br>Chất ô nhiễm chính: " + item.main_pollutant
-                                + "<br>Nhiệt độ: " + item.temperature + " độ C"
-                                + "<br>Áp suất không khí: " + item.atmospheric_pressure + "hPa"
-                                + "<br>Độ ẩm: " + item.humidity + "%"
-                                + "<br>Tốc độ gió: " + item.wind_speed + "m/s"
-                                + "<br>Tình trạng thời tiết: " + item.weather;
+            var popupContent =  "<div class='container' style='width: 560px; color: black; padding:5px 5px 5px 5px; background-color: " + item.airQuality_1.color + ";'>"
+                                 + "<h2 style='text-align: center;'>" + item.airQuality_1.location.city + "</h2>"
+                                + "<h3 style='text-align: center;'>Trạm đo: " + item.airQuality_1.location.name + "</h3>"
+                                + "<table class='styled-table' style='width: 470px;'>"
+                                    +"<thead>" +
+                                        "<td>Thời gian cập nhật</td>" +
+                                        "<td>Chỉ số không khí</td>" +
+                                        "<td>Chất ô nhiễm chính</td>" +
+                                        "<td>Áp suất không khí</td>" +
+                                        "<td>Nhiệt độ</td>" +
+                                        "<td>Độ ẩm</td>" +
+                                        "<td>Tốc độ gió</td>" +
+                                    "</thead>" +
+                                    "<tbody>" +
+                                        "<tr>" +
+                                            "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_1.created_at)+"</td>" +
+                                            "<td>"+ item.airQuality_1.aqi+"</td>" +
+                                            "<td>"+ item.airQuality_1.main_pollutant+"</td>" +
+                                            "<td>"+ item.airQuality_1.p+"hPa</td>" +
+                                            "<td>"+ item.airQuality_1.t+" độ C</td>" +
+                                            "<td>"+ item.airQuality_1.h+"%</td>" +
+                                            "<td>"+ item.airQuality_1.w+"m/s</td>" +
+                                        "</tr>" +
+                                        "<tr>" +
+                                        "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_2.created_at) +"</td>" +
+                                        "<td>"+ item.airQuality_2.aqi+"</td>" +
+                                        "<td>"+ item.airQuality_2.main_pollutant+"</td>" +
+                                        "<td>"+ item.airQuality_2.p+"hPa</td>" +
+                                        "<td>"+ item.airQuality_2.t+" độ C</td>" +
+                                        "<td>"+ item.airQuality_2.h+"%</td>" +
+                                        "<td>"+ item.airQuality_2.w+"m/s</td>" +
+                                        "</tr>" +
+                                        "<tr>" +
+                                        "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_3.created_at)+"</td>" +
+                                        "<td>"+ item.airQuality_3.aqi+"</td>" +
+                                        "<td>"+ item.airQuality_3.main_pollutant+"</td>" +
+                                        "<td>"+ item.airQuality_3.p+"hPa</td>" +
+                                        "<td>"+ item.airQuality_3.t+" độ C</td>" +
+                                        "<td>"+ item.airQuality_3.h+"%</td>" +
+                                        "<td>"+ item.airQuality_3.w+"m/s</td>" +
+                                        "</tr>" +
+                                        "<tr>" +
+                                        "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_4.created_at)+"</td>" +
+                                        "<td>"+ item.airQuality_4.aqi+"</td>" +
+                                        "<td>"+ item.airQuality_4.main_pollutant+"</td>" +
+                                        "<td>"+ item.airQuality_4.p+"hPa</td>" +
+                                        "<td>"+ item.airQuality_4.t+" độ C</td>" +
+                                        "<td>"+ item.airQuality_4.h+"%</td>" +
+                                        "<td>"+ item.airQuality_4.w+"m/s</td>" +
+                                        "</tr>" +
+                                    "</tbody>"
+                                +"</table>"
+                                + "<h3 style='text-align: center;'>Thành phần không khí</h3>"
+                                + "<table class='styled-table' style='width: 470px;'>"
+                                    +"<thead>" +
+                                        "<td>Thời gian cập nhật</td>" +
+                                        "<td>CO</td>" +
+                                        "<td>SO2</td>" +
+                                        "<td>O3</td>" +
+                                        "<td>NO2</td>" +
+                                        "<td>PM2.5</td>" +
+                                        "<td>PM10</td>" +
+                                    "</thead>" +
+                                    "<tbody>" +
+                                        "<tr>" +
+                                            "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_1.created_at)+"</td>" +
+                                            "<td>"+ item.airQuality_1.co+"µg/m³</td>" +
+                                            "<td>"+ item.airQuality_1.so2+"µg/m³</td>" +
+                                            "<td>"+ item.airQuality_1.o3+"µg/m³</td>" +
+                                            "<td>"+ item.airQuality_1.no2+"µg/m³</td>" +
+                                            "<td>"+ item.airQuality_1.pm25+"µg/m³</td>" +
+                                            "<td>"+ item.airQuality_1.pm10+"µg/m³</td>" +
+                                        "</tr>" +
+                                        "<tr>" +
+                                        "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_2.created_at)+"</td>" +
+                                        "<td>"+ item.airQuality_2.co+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_2.so2+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_2.o3+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_2.no2+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_2.pm25+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_2.pm10+"µg/m³</td>" +
+                                        "</tr>" +
+                                        "<tr>" +
+                                        "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_3.created_at)+"</td>" +
+                                        "<td>"+ item.airQuality_3.co+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_3.so2+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_3.o3+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_3.no2+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_3.pm25+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_3.pm10+"µg/m³</td>" +
+                                        "</tr>" +
+                                        "<tr>" +
+                                        "<td>"+ convertTimeToVietnameseDateTime(item.airQuality_4.created_at) +"</td>" +
+                                        "<td>"+ item.airQuality_4.co+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_4.so2+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_4.o3+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_4.no2+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_4.pm25+"µg/m³</td>" +
+                                        "<td>"+ item.airQuality_4.pm10+"µg/m³</td>" +
+                                        "</tr>" +
+                                    "</tbody>"
+                                +"</table>"
+                                + "</div>"
+                                ;
             // Gắn popup vào ExtraMarker
             extraMarker.bindPopup(popupContent);
         });
+
+
         var legend = L.control({position: 'bottomright'});
 
         legend.onAdd = function (map) {
             var div = L.DomUtil.create('div', 'legend');
-            div.innerHTML += '<h4>Chú thích</h4>';
-            div.innerHTML += '<p style="background-color: #17fc03; color: white; text-align: center">0-50</p>';
-            div.innerHTML += '<p style="background-color: #fcba03; color: white; text-align: center">51-100</p>';
-            div.innerHTML += '<p style="background-color: #fc8403; color: white; text-align: center">101-150</p>';
-            div.innerHTML += '<p style="background-color: #fc2c03; color: white; text-align: center">151-200</p>';
-            div.innerHTML += '<p style="background-color: #660066; color: white; text-align: center">201-300</p>';
-            div.innerHTML += '<p style="background-color: #800000; color: white; text-align: center">>300</p>';
+            div.innerHTML += '<h4 style="text-align: center;">Chú thích</h4>';
+            div.innerHTML += '<p style="background-color: #00e400; color: white; text-align: center">0-50: Tốt</p>';
+            div.innerHTML += '<p style="background-color: #fcba03; color: white; text-align: center">51-100: Trung bình</p>';
+            div.innerHTML += '<p style="background-color: #fc8403; color: white; text-align: center">101-150: Kém</p>';
+            div.innerHTML += '<p style="background-color: #fc2c03; color: white; text-align: center">151-200: Xấu</p>';
+            div.innerHTML += '<p style="background-color: #660066; color: white; text-align: center">201-300: Rất xấu</p>';
+            div.innerHTML += '<p style="background-color: #800000; color: white; text-align: center">>300: Nguy hại</p>';
             return div;
         };
 

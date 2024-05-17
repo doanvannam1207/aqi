@@ -23,19 +23,33 @@ public class AirQuality {
     @JoinColumn(name = "location_id")
     private Location location;
     @Column
-    private double temperature; //nhiệt độ
-    @Column
-    private double humidity; //độ ẩm
-    @Column
-    private double atmospheric_pressure; // áp suất khí quyển
-    @Column
-    private double wind_speed; //tốc độ gió
-    @Column
-    private String weather; //thời tiết
-    @Column
     private int aqi; // chỉ số chất lượng không khí
     @Column
     private String main_pollutant; //chất gây ô nhiễm chính
+    @Column
+    private double co; //CO (Carbon Monoxide) µg/m³
+    @Column
+    private double dew; //Dew (Hạt sương): Độ ẩm hạt sương g/m³
+    @Column
+    private double h; //Humidity - Độ ẩm %
+    @Column
+    private double no2; //NO2 (Nitrogen Dioxide) µg/m³
+    @Column
+    private double o3; //O3 (Ozone) µg/m³
+    @Column
+    private double p; //Pressure - Áp suất hPa
+    @Column
+    private double pm10; //PM10 (Particulate Matter < 10 µm) µg/m³
+    @Column
+    private double pm25; //PM2.5 (Particulate Matter < 2.5 µm) µg/m³
+    @Column
+    private double so2; //SO2 (Sulfur Dioxide) µg/m³
+    @Column
+    private double t; //Temperature - Nhiệt độ °C
+    @Column
+    private double w; //wind-gió m/s
+    @Column
+    private double wg; //Wind Gust - Cơn gió): Cơn gió có tốc độ là m/s
     @Column
     private String color;
     @Column(updatable = false)
