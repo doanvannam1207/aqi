@@ -57,7 +57,7 @@
 <script>
     $(document).ready(function () {
         // Call the Spring Boot API to fetch air quality data
-        $.getJSON("/test", function (data) {
+        $.getJSON("/airquality-data", function (data) {
             displayAirQualityOnMap(data);
         });
     });

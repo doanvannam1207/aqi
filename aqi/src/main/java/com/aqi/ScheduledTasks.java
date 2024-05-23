@@ -16,7 +16,7 @@ public class ScheduledTasks {
     private AirQualityService airQualityService;
     // Tác vụ chạy mỗi 10 phút
     @Scheduled(fixedRate = 600000)
-    public void taskWithFixedRate() throws JSONException, URISyntaxException, IOException, InterruptedException {
+    public void taskWithFixedRate() throws JSONException, IOException {
         airQualityService.save();
     }
 }

@@ -56,7 +56,6 @@ public class AirQualityService {
         return airQualityDTOS;
     }
 
-    //private final String apiUrl = "https://api.airvisual.com/v2/nearest_city";
     private final String apiUrl = "https://api.waqi.info/feed/geo:";
 
 
@@ -87,12 +86,9 @@ public class AirQualityService {
                 ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
                 JSONObject jsonResponse = new JSONObject(response.getBody());
 
-
                 AirQuality airQuality = new AirQuality();
                 JSONObject data = jsonResponse.getJSONObject("data");
                 JSONObject iaqi = data.getJSONObject("iaqi");
-                //System.out.println(iaqi.toString());
-                //AirQuality airQuality = JSONToAirQuality(iaqi);
                 airQuality.setLocation(l);
                 String aqi = data.getString("aqi");
                 if(aqi.equals("-")){
@@ -136,43 +132,13 @@ public class AirQualityService {
                 if(iaqi.has("wg")){
                     airQuality.setWg(iaqi.getJSONObject("wg").getDouble("v"));
                 }
-//                airQuality.setDew(iaqi.getJSONObject("dew").getDouble("v"));
-//                airQuality.setH(iaqi.getJSONObject("h").getInt("v"));
-//                //airQuality.setNo2(iaqi.getJSONObject("no2").getDouble("v"));
-//                //airQuality.setO3(iaqi.getJSONObject("o3").getDouble("v"));
-//                airQuality.setP(iaqi.getJSONObject("p").getInt("v"));
-//                //airQuality.setPm10(iaqi.getJSONObject("pm10").getDouble("v"));
-//                airQuality.setPm25(iaqi.getJSONObject("pm25").getDouble("v"));
-//                //airQuality.setSo2(iaqi.getJSONObject("so2").getDouble("v"));
-//                airQuality.setT(iaqi.getJSONObject("t").getDouble("v"));
-//                airQuality.setW(iaqi.getJSONObject("w").getDouble("v"));
-                //airQuality.setWg(iaqi.getJSONObject("wg").getDouble("v"));
-//                airQuality.setCity(l.getCity());
-//                JSONObject location = data.getJSONObject("location");
-//                JSONArray coordinates = (JSONArray) location.get("coordinates");
-//                airQuality.setLongitude((double) coordinates.get(0));
-//                airQuality.setLatitude((double) coordinates.get(1));
-
-//                JSONObject current_js = data.getJSONObject("current");
-//                JSONObject pollution_js = current_js.getJSONObject("pollution");
-//                JSONObject weather_js = current_js.getJSONObject("weather");
-//
-//                airQuality.setAqi(pollution_js.getInt("aqius"));
-//                airQuality.setMain_pollutant(pollution_js.getString("mainus"));
-//
-//                airQuality.setTemperature(weather_js.getInt("tp"));
-//                airQuality.setAtmospheric_pressure(weather_js.getInt("pr"));
-//                airQuality.setHumidity(weather_js.getInt("hu"));
-//                airQuality.setWind_speed(weather_js.getDouble("ws"));
-//                airQuality.setWeather(weather_js.getString("ic"));
-
                 airQualityDataList.add(airQuality);
             }
             return airQualityDataList;
         }
     }
 
-    public List<AirQuality> save() throws JSONException, URISyntaxException, IOException, InterruptedException {
+    public List<AirQuality> save() throws JSONException, IOException {
         List<AirQuality> airQualityList = getAirQualityData();
         for(AirQuality airQuality: airQualityList){
             if(airQuality.getAqi() >= 0 && airQuality.getAqi() <= 50){
